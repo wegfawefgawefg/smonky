@@ -1,0 +1,8 @@
+[
+  {
+    "directory": "/home/vega/Coding/smonky/build",
+    "command": "cc -Ismonky@exe -I. -I../src -I/usr/include/SDL2 -I/usr/local/include -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g -D_REENTRANT -MD -MQ 'smonky@exe/main.c.o' -MF 'smonky@exe/main.c.o.d' -o 'smonky@exe/main.c.o' -c ../src/main.c",
+    "file": "../src/main.c",
+    "output": "smonky@exe/main.c.o"
+  }
+]
