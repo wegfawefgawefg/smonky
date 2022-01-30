@@ -67,14 +67,14 @@ struct smoke {
     float life_span;
     float life;
 };
-static const int NUM_SMOKES = 256;
+static const int NUM_SMOKES = 1024;
 
 static const float SMOKE_SPEED = 1000.0f;
 static const float SMOKE_LIFE = 5.0f;
 struct smoke new_smoke(vec2 dir)
 {
     // randomize speed
-    float speed = rand_range(0.0f, SMOKE_SPEED);
+    float speed = rand_range(SMOKE_SPEED / 2.0f, SMOKE_SPEED);
 
     // calculate velocity
     vec2 vel;
@@ -97,9 +97,9 @@ struct smoke new_smoke(vec2 dir)
     new_smoke.vel[1] = vel[1];
     new_smoke.angle = rand_range(0.0f, 2.0f * M_PI);
     new_smoke.angle_vel = rand_range(-360, 360);
-    new_smoke.size = rand_range(0.0f, 1.0f);
-    new_smoke.size_vel = rand_range(0, 1.0f);
-    new_smoke.life_span = rand_range(0, SMOKE_LIFE);
+    new_smoke.size = rand_range(0.0f, 0.5f);
+    new_smoke.size_vel = rand_range(0, 0.5f);
+    new_smoke.life_span = rand_range(SMOKE_LIFE / 2.0f, SMOKE_LIFE);
     new_smoke.life = new_smoke.life_span;
     return new_smoke;
 }
@@ -212,7 +212,7 @@ int main(int argc, char **argv)
             smokes[i].pos[1] = new_pos[1];
 
             // smoke antigravity
-            smokes[i].pos[1] += -100.0 * dt;
+            smokes[i].pos[1] += -20.0 * dt;
 
             smokes[i].angle = fmod(smokes[i].angle + smokes[i].angle_vel * dt, 360.0);
             smokes[i].size = fmax(0.0, smokes[i].size + smokes[i].size_vel * dt);
