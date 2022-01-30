@@ -40,8 +40,8 @@ build smonky@exe/main.c.o: c_COMPILER ../src/main.c
  DEPFILE = smonky@exe/main.c.o.d
  ARGS = -Ismonky@exe -I. -I../src -I/usr/include/SDL2 -I/usr/local/include -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g -D_REENTRANT
 
-build smonky: c_LINKER smonky@exe/main.c.o | /usr/lib/x86_64-linux-gnu/libm.a /usr/lib/x86_64-linux-gnu/libm.so /usr/lib/x86_64-linux-gnu/libSDL2.so /usr/lib/x86_64-linux-gnu/libSDL2_ttf.so /usr/local/lib/libcglm.so
- LINK_ARGS = -Wl,--as-needed -Wl,--no-undefined -Wl,--start-group /usr/lib/x86_64-linux-gnu/libSDL2.so /usr/lib/x86_64-linux-gnu/libSDL2_ttf.so /usr/local/lib/libcglm.so -lm -Wl,--end-group -Wl,-rpath,/usr/local/lib -Wl,-rpath-link,/usr/local/lib
+build smonky: c_LINKER smonky@exe/main.c.o | /usr/lib/x86_64-linux-gnu/libm.a /usr/lib/x86_64-linux-gnu/libm.so /usr/lib/x86_64-linux-gnu/libSDL2.so /usr/lib/x86_64-linux-gnu/libSDL2_ttf.so /usr/lib/x86_64-linux-gnu/libSDL2_image.so /usr/local/lib/libcglm.so
+ LINK_ARGS = -Wl,--as-needed -Wl,--no-undefined -Wl,--start-group /usr/lib/x86_64-linux-gnu/libSDL2.so /usr/lib/x86_64-linux-gnu/libSDL2_ttf.so /usr/lib/x86_64-linux-gnu/libSDL2_image.so /usr/local/lib/libcglm.so -lm -Wl,--end-group -Wl,-rpath,/usr/local/lib -Wl,-rpath-link,/usr/local/lib
 
 # Test rules
 

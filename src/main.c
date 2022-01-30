@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #include <cglm/cglm.h>
 
@@ -35,6 +36,19 @@ void draw_text(
     SDL_DestroyTexture(text_texture);
 }
 
+struct dimensions {
+    int width, height;
+};
+
+void load_image(
+        SDL_Renderer *renderer, 
+        SDL_Texture **texture, 
+        char *path) {
+    SDL_Surface *surface = SDL_LoadBMP(path);
+    *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+}
+
 const float rand_range(float min, float max) {
     return min + (max - min) * (rand() % RAND_MAX / (float)RAND_MAX);
 }
@@ -46,10 +60,14 @@ const vec2 emitter = {
 struct smoke {
     vec2 pos;
     vec2 vel;
+    float angle;
+    float angle_vel;
+    float size;
+    float size_vel;
     float life_span;
     float life;
 };
-static const int NUM_SMOKES = 1024*64;
+static const int NUM_SMOKES = 256;
 
 static const float SMOKE_SPEED = 1000.0f;
 static const float SMOKE_LIFE = 5.0f;
@@ -77,6 +95,10 @@ struct smoke new_smoke(vec2 dir)
     new_smoke.pos[1] = emitter[1];
     new_smoke.vel[0] = vel[0];
     new_smoke.vel[1] = vel[1];
+    new_smoke.angle = rand_range(0.0f, 2.0f * M_PI);
+    new_smoke.angle_vel = rand_range(-360, 360);
+    new_smoke.size = rand_range(0.0f, 1.0f);
+    new_smoke.size_vel = rand_range(0, 1.0f);
     new_smoke.life_span = rand_range(0, SMOKE_LIFE);
     new_smoke.life = new_smoke.life_span;
     return new_smoke;
@@ -107,6 +129,16 @@ int main(int argc, char **argv)
         printf("Failed to load font: %s\n", TTF_GetError());
         return 1;
     }
+
+    // load smoke
+    SDL_Texture *smoke_texture = IMG_LoadTexture(renderer, "./assets/smoke.png");
+    int width, height;
+    SDL_QueryTexture(smoke_texture, NULL, NULL, &width, &height);
+    const int smoke_scale = 4;
+    const struct dimensions smoke_shape = {
+        64 * smoke_scale, 
+        64 * smoke_scale,
+    };
 
     struct smoke smokes[NUM_SMOKES];
     for(int i = 0; i < NUM_SMOKES; i++)
@@ -179,8 +211,15 @@ int main(int argc, char **argv)
             smokes[i].pos[0] = new_pos[0];
             smokes[i].pos[1] = new_pos[1];
 
+            // smoke antigravity
+            smokes[i].pos[1] += -100.0 * dt;
+
+            smokes[i].angle = fmod(smokes[i].angle + smokes[i].angle_vel * dt, 360.0);
+            smokes[i].size = fmax(0.0, smokes[i].size + smokes[i].size_vel * dt);
+
             // shrink velocity
-            glm_vec2_scale(smokes[i].vel, 0.99, smokes[i].vel);
+            glm_vec2_scale(smokes[i].vel, 0.98, smokes[i].vel);
+            smokes[i].angle_vel *= 0.98;
 
             // age out
             smokes[i].life -= dt;
@@ -201,17 +240,28 @@ int main(int argc, char **argv)
             //  // col
             const struct smoke s = smokes[i];
             float a = s.life / s.life_span;
+            a = a * 0.5;
             a = a * a;
             a = a * 255;
-            int col = (int)a;
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, col);    
+            int alpha = (int)a;
+            // SDL_SetRenderDrawColor(renderer, 255, 255, 255, col);    
 
             //  // pos
+            vec2 scale = {
+                smoke_shape.width * smokes[i].size,
+                smoke_shape.height * smokes[i].size
+            };
             const SDL_Rect rect = {
-                (int)smokes[i].pos[0],
-                (int)smokes[i].pos[1],
-                10, 10};
-            SDL_RenderFillRect(renderer, &rect);
+                (int)smokes[i].pos[0] - (scale[0] / 2),
+                (int)smokes[i].pos[1] - (scale[1] / 2),
+                (int)scale[0],
+                (int)scale[1]
+            };
+            // SDL_RenderCopy(renderer, smoke_texture, NULL, &rect);
+            SDL_SetTextureAlphaMod(smoke_texture, alpha);
+            const float angle = smokes[i].angle;
+            SDL_RenderCopyEx(renderer, smoke_texture, NULL, &rect, angle, NULL, SDL_FLIP_NONE);
+            // SDL_RenderFillRect(renderer, &rect);
         }
 
 
